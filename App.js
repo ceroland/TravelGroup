@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   StyleSheet, Text, View, Image, Button, Platform,
   TouchableOpacity,
-  FlatList
+  FlatList, Alert
 } from "react-native"
 import { androidClientId } from "./superSecretKey"
 import Expo from "expo"
@@ -12,10 +12,15 @@ export default class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      signedIn: false,
-      name: "",
-      photoUrl: ""
+      login: {
+        signedIn: false,
+        name: "",
+        photoUrl: ""
+      },
+      tela: "home"
     }
+    // this.handleClickFooter = this.handleClickFooter.bind(this,"");
+    // this.teste = this.teste.bind(this);
   }
   signIn = async () => {
     try {
@@ -26,9 +31,11 @@ export default class App extends React.Component {
 
       if (result.type === "success") {
         this.setState({
-          signedIn: true,
-          name: result.user.name,
-          photoUrl: result.user.photoUrl
+          login: {
+            signedIn: true,
+            name: result.user.name,
+            photoUrl: result.user.photoUrl
+          }
         })
       } else {
         console.log("cancelled")
@@ -37,12 +44,23 @@ export default class App extends React.Component {
       console.log("error", e)
     }
   }
+
+  handleClickFooter = async (param) => {
+    try {
+      this.setState({ tela: param }, () => {
+        Alert.alert(this.state.tela)
+      })
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
-        {this.state.signedIn ? (
+        {this.state.login.signedIn ? (
 
-          <LoggedInPage name={this.state.name} photoUrl={this.state.photoUrl} />
+          <LoggedInPage name={this.state.login.name} photoUrl={this.state.login.photoUrl}  handleClickFooter={this.handleClickFooter} tela={this.state.tela}/>
 
         ) : (
             <View style={styles.containerLogin}>
@@ -82,24 +100,33 @@ const LoggedInPage = props => {
         </View>
       </View>
       <View style={styles.body}>
-        <FlatList
+        {props.tela == 'home' ?
+          (
+            <View style={styles.container}>
+              <Text style={styles.header}>Bem vindo:{props.name}</Text>
+              <Image style={styles.image} source={{ uri: props.photoUrl }} />
+            </View>)
+          : (
+            <Text style={styles.header}>teste:{props.name}</Text>)
+        }
+        {/* <FlatList
           // data={data.items}
           // renderItem={(video)=><VideoItem video={video.item} />}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <View style={{ height: 0.5, backgroundColor: '#E5E5E5' }} />}
 
-        />
+        /> */}
       </View>
       <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('home')}  >
           <Icon name="home" size={25} />
           <Text style={styles.tabTitle}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('viagem')}    >
           <Icon name="navigation" size={25} />
           <Text style={styles.tabTitle}>Viagem</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('viagem')}    >
           <Icon name="group" size={25} />
           <Text style={styles.tabTitle}>Grupo</Text>
         </TouchableOpacity>
