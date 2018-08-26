@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, Image, Button, Platform,
+  StyleSheet, Text, View, Image, Button, Platform, TextInput, Button,
   TouchableOpacity,
   FlatList, Alert
 } from "react-native"
@@ -17,7 +17,8 @@ export default class App extends React.Component {
         name: "",
         photoUrl: ""
       },
-      tela: "home"
+      tela: "home",
+      habilitaCriarGrupo: true
     }
     // this.handleClickFooter = this.handleClickFooter.bind(this,"");
     // this.teste = this.teste.bind(this);
@@ -48,7 +49,17 @@ export default class App extends React.Component {
   handleClickFooter = async (param) => {
     try {
       this.setState({ tela: param }, () => {
-        Alert.alert(this.state.tela)
+        //Alert.alert(this.state.tela)
+      })
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+
+  onPressCreateGrupo = async () => {
+    try {
+      this.setState({ habilitaCriarGrupo: true }, () => {
+        //Alert.alert(this.state.tela)
       })
     } catch (e) {
       console.log("error", e)
@@ -60,7 +71,7 @@ export default class App extends React.Component {
       <View style={styles.container}>
         {this.state.login.signedIn ? (
 
-          <LoggedInPage name={this.state.login.name} photoUrl={this.state.login.photoUrl}  handleClickFooter={this.handleClickFooter} tela={this.state.tela}/>
+          <LoggedInPage name={this.state.login.name} photoUrl={this.state.login.photoUrl} handleClickFooter={this.handleClickFooter} tela={this.state.tela} />
 
         ) : (
             <View style={styles.containerLogin}>
@@ -105,17 +116,27 @@ const LoggedInPage = props => {
             <View style={styles.container}>
               <Text style={styles.header}>Bem vindo:{props.name}</Text>
               <Image style={styles.image} source={{ uri: props.photoUrl }} />
-            </View>)
-          : (
-            <Text style={styles.header}>teste:{props.name}</Text>)
+            </View>
+          )
+          : props.tela == 'viagem' ?
+            (
+              <View>
+                <Text style={styles.header}>Para entrar em um grupo existente, use o codigo do grupo fornecido pelo criador do mesmo</Text>
+                <TextInput onChangeText={(text) => this.setState({ text })}
+                  value={this.state.text} />
+              </View>
+            )
+            : (
+              <View>
+                <Button
+                  onPress={onPressCreateGrupo}
+                  title="Criar grupo"
+                  color="#841584"
+                  accessibilityLabel="Precione para criar um novo grupo"
+                />
+              </View>
+            )
         }
-        {/* <FlatList
-          // data={data.items}
-          // renderItem={(video)=><VideoItem video={video.item} />}
-          keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => <View style={{ height: 0.5, backgroundColor: '#E5E5E5' }} />}
-
-        /> */}
       </View>
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('home')}  >
@@ -126,7 +147,7 @@ const LoggedInPage = props => {
           <Icon name="navigation" size={25} />
           <Text style={styles.tabTitle}>Viagem</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('viagem')}    >
+        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('grupo')}    >
           <Icon name="group" size={25} />
           <Text style={styles.tabTitle}>Grupo</Text>
         </TouchableOpacity>
