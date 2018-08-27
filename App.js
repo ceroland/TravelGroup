@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, Image, Button, Platform,
+  StyleSheet, Text, View, Image, Button, Platform, TextInput,
   TouchableOpacity,
   FlatList, Alert
 } from "react-native"
 import { androidClientId } from "./superSecretKey"
+import { googleMapsApi } from "./superSecretKey"
 import Expo from "expo"
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Geocoder from 'react-native-geocoding';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -17,7 +19,9 @@ export default class App extends React.Component {
         name: "",
         photoUrl: ""
       },
-      tela: "home"
+      tela: "home",
+      habilitaCriarGrupo: false,
+      destino: ""
     }
     // this.handleClickFooter = this.handleClickFooter.bind(this,"");
     // this.teste = this.teste.bind(this);
@@ -48,19 +52,72 @@ export default class App extends React.Component {
   handleClickFooter = async (param) => {
     try {
       this.setState({ tela: param }, () => {
-        Alert.alert(this.state.tela)
+        //Alert.alert(this.state.tela)
       })
     } catch (e) {
       console.log("error", e)
     }
   }
 
+  onPressCreateGrupo = async () => {
+    try {
+      this.setState({ habilitaCriarGrupo: true }, () => {
+        // Alert.alert(this.state.habilitaCriarGrupo)
+      })
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+
+  onPressBuscaLongetudeLatidePorNome = async () => {
+    try {
+      Geocoder.setApiKey(googleMapsApi);
+
+      Geocoder.from(this.state.destino).then(
+        json => {
+          let location = json.results[0].geometry.location;
+          alert(location.lat + ", " + location.lng);
+        }, 
+        error => {
+          console.log("error", e)
+        }
+      ); 
+      // Geocoder.from("Colosseum")
+      //   .then(json => {
+      //     var location = json.results[0].geometry.location;
+      //     console.log(location);
+      //   })
+      //   .catch(error => console.warn(error));
+        
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+  onChangeTextDestino = async (param) => {
+    try {
+      this.setState({ destino: param }, () => {
+        //  Alert.alert(this.state.destino)
+      })
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+
+
   render() {
     return (
       <View style={styles.container}>
         {this.state.login.signedIn ? (
 
-          <LoggedInPage name={this.state.login.name} photoUrl={this.state.login.photoUrl}  handleClickFooter={this.handleClickFooter} tela={this.state.tela}/>
+          <LoggedInPage name={this.state.login.name}
+            photoUrl={this.state.login.photoUrl}
+            handleClickFooter={this.handleClickFooter}
+            tela={this.state.tela}
+            onPressCreateGrupo={this.onPressCreateGrupo}
+            habilitaCriarGrupo={this.state.habilitaCriarGrupo}
+            destino={this.state.destino}
+            onChangeTextDestino={this.onChangeTextDestino}
+            onPressBuscaLongetudeLatidePorNome={this.onPressBuscaLongetudeLatidePorNome} />
 
         ) : (
             <View style={styles.containerLogin}>
@@ -100,22 +157,51 @@ const LoggedInPage = props => {
         </View>
       </View>
       <View style={styles.body}>
-        {props.tela == 'home' ?
-          (
-            <View style={styles.container}>
-              <Text style={styles.header}>Bem vindo:{props.name}</Text>
-              <Image style={styles.image} source={{ uri: props.photoUrl }} />
-            </View>)
-          : (
-            <Text style={styles.header}>teste:{props.name}</Text>)
+        {props.habilitaCriarGrupo ? (
+          <View style={styles.container}>
+            <Text style={styles.headerTitle} >Informe o Destino</Text>
+            <Text style={styles.headerLabel} >~{"\n"} Informe a cidade de destino da viagem</Text>
+            <TextInput value={props.destino} onChangeText={(text) => props.onChangeTextDestino(text)} />
+            <Button
+              onPress={() => props.onPressBuscaLongetudeLatidePorNome()}
+              title="Proxima etapa"
+              color="#841584"
+              accessibilityLabel="Proxima Etapa"
+            />
+          </View>
+        ) : props.tela == 'home' ?
+            (
+              <View style={styles.container}>
+                <Text style={styles.header}>Bem vindo:{props.name}</Text>
+                <Image style={styles.image} source={{ uri: props.photoUrl }} />
+              </View>
+            )
+            : props.tela == 'viagem' ?
+              (
+                <View>
+                  <Text style={styles.headerTitle} >Ingressar ao Grupo</Text>
+                  <Text style={styles.headerLabel} >~{"\n"} Para pingressar ao grupo existente, use o codigo do grupo fornecido pelo criador do mesmo</Text>
+                  <TextInput id="IdGrupo" />
+                  <Button
+                    onPress={() => props.onPressCreateGrupo()}
+                    title="Criar grupo"
+                    color="#841584"
+                    accessibilityLabel="Entrar no grupo"
+                  />
+                </View>
+              )
+              : (
+                <View>
+                  <Text style={styles.headerTitle} >Criar Grupo</Text>
+                  <Button
+                    onPress={() => props.onPressCreateGrupo()}
+                    title="Criar grupo"
+                    color="#841584"
+                    accessibilityLabel="Precione para criar um novo grupo"
+                  />
+                </View>
+              )
         }
-        {/* <FlatList
-          // data={data.items}
-          // renderItem={(video)=><VideoItem video={video.item} />}
-          keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => <View style={{ height: 0.5, backgroundColor: '#E5E5E5' }} />}
-
-        /> */}
       </View>
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('home')}  >
@@ -126,7 +212,7 @@ const LoggedInPage = props => {
           <Icon name="navigation" size={25} />
           <Text style={styles.tabTitle}>Viagem</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('viagem')}    >
+        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('grupo')}    >
           <Icon name="group" size={25} />
           <Text style={styles.tabTitle}>Grupo</Text>
         </TouchableOpacity>
@@ -182,6 +268,12 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 25
+  },
+  headerTitle: {
+    fontSize: 17
+  },
+  headerLabel: {
+    fontSize: 15
   },
   image: {
     marginTop: 15,
