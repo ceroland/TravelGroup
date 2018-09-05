@@ -71,24 +71,23 @@ export default class App extends React.Component {
 
   onPressBuscaLongetudeLatidePorNome = async () => {
     try {
-      Geocoder.setApiKey(googleMapsApi);
+      //Geocoder.init(googleMapsApi);
+      Geocoder.fallbackToGoogle(googleMapsApi);
 
-      Geocoder.from(this.state.destino).then(
-        json => {
-          let location = json.results[0].geometry.location;
-          alert(location.lat + ", " + location.lng);
-        }, 
-        error => {
-          console.log("error", e)
-        }
-      ); 
-      // Geocoder.from("Colosseum")
-      //   .then(json => {
-      //     var location = json.results[0].geometry.location;
-      //     console.log(location);
-      //   })
-      //   .catch(error => console.warn(error));
-        
+      // Geocoder.from(this.state.destino).then(
+      //   json => {
+      //     let location = json.results[0].geometry.location;
+      //     alert(location.lat + ", " + location.lng);
+      //   }, 
+      //   error => {
+      //     console.log("error", e)
+      //   }
+      // ); 
+      Geocoder.geocodeAddress('New York').then(res => {
+        alert(location.lat + ", " + location.lng);
+      })
+        .catch(err => console.log(err))
+
     } catch (e) {
       console.log("error", e)
     }
