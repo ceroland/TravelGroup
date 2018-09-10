@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
   StyleSheet, Text, View, Image, Button, Platform, TextInput,
-  TouchableOpacity,
+  TouchableOpacity,ImageBackground,
   FlatList, Alert
 } from "react-native"
 import { androidClientId } from "./superSecretKey"
@@ -117,11 +117,8 @@ export default class App extends React.Component {
             destino={this.state.destino}
             onChangeTextDestino={this.onChangeTextDestino}
             onPressBuscaLongetudeLatidePorNome={this.onPressBuscaLongetudeLatidePorNome} />
-
         ) : (
-            <View style={styles.containerLogin}>
               <LoginPage signIn={this.signIn} />
-            </View>
           )}
       </View>
     )
@@ -130,10 +127,9 @@ export default class App extends React.Component {
 
 const LoginPage = props => {
   return (
-    <View>
-      <Text style={styles.header}>Login</Text>
-      <Button title="Logar com o Google" onPress={() => props.signIn()} />
-    </View>
+      <ImageBackground source={require('./images/logo_tcc.jpg')} style={styles.container}>
+        <Button title="Logar com o Google" onPress={() => props.signIn()} />
+      </ImageBackground>
   )
 }
 
@@ -273,6 +269,12 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     fontSize: 15
+  },
+  ImageBackground: {
+    flex: 1,
+    width: null,
+    height: null,
+    resizeMode: 'cover'
   },
   image: {
     marginTop: 15,
