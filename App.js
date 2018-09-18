@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   StyleSheet, Text, View, Image, Button, Platform, TextInput,
   TouchableOpacity, ImageBackground,
-  FlatList, Alert
+  FlatList, Alert, Linking
 } from "react-native"
 import { androidClientId } from "./superSecretKey"
 import { googleMapsApi } from "./superSecretKey"
@@ -25,7 +25,8 @@ export default class App extends React.Component {
       },
       tela: "home",
       habilitaCriarGrupo: false,
-      destino: ""
+      destino: "",
+      EtapaCriar: 1
     }
     // this.handleClickFooter = this.handleClickFooter.bind(this,"");
     // this.teste = this.teste.bind(this);
@@ -105,6 +106,22 @@ export default class App extends React.Component {
       console.log("error", e)
     }
   }
+  onPressProximaEtapa = async (param) => {
+    try {
+      if (param == 1) {
+        this.setState({ EtapaCriar: 2 }, () => {
+          Alert.alert(' Grupo criado com sucesso!!!\n Codigo do Grupo : XXW3AP')
+        })
+      } else if (param == 2) {
+        // this.setState({ EtapaCriar: 3 }, () => {
+        // })
+        Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravellGroup. Codigo do Grupo : XXW3AP'.replace(/ /g, '%20'))
+      }
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+
 
 
   render() {
@@ -120,7 +137,9 @@ export default class App extends React.Component {
             habilitaCriarGrupo={this.state.habilitaCriarGrupo}
             destino={this.state.destino}
             onChangeTextDestino={this.onChangeTextDestino}
-            onPressBuscaLongetudeLatidePorNome={this.onPressBuscaLongetudeLatidePorNome} />
+            onPressBuscaLongetudeLatidePorNome={this.onPressBuscaLongetudeLatidePorNome}
+            onPressProximaEtapa={this.onPressProximaEtapa}
+            EtapaCriar={this.state.EtapaCriar} />
         ) : (
             <LoginPage signIn={this.signIn} />
           )}
@@ -141,10 +160,6 @@ const LoginPage = props => {
 
 const LoggedInPage = props => {
   return (
-    // <View style={styles.container}>
-    //   <Text style={styles.header}>Bem vindo:{props.name}</Text>
-    //   <Image style={styles.image} source={{ uri: props.photoUrl }} />
-    // </View>
     <View style={styles.container}>
       <View style={styles.navBar}>
         {/* <Image source={require('./images/logo.png')} style={{ width: 98, height: 22 }} /> */}
@@ -160,16 +175,39 @@ const LoggedInPage = props => {
       <View style={styles.body}>
         {props.habilitaCriarGrupo ? (
           <View style={styles.container}>
-            <Text style={styles.headerTitle} >Informe o Destino</Text>
-            <Text style={styles.headerLabel} >~{"\n"} Informe a cidade de destino da viagem</Text>
-            <TextInput value={props.destino} onChangeText={(text) => props.onChangeTextDestino(text)} />
-            <Button
-              onPress={() => props.onPressBuscaLongetudeLatidePorNome()}
-              title="Proxima etapa"
-              color="#841584"
-              accessibilityLabel="Proxima Etapa"
-            />
-            {/* <GooglePlacesInput signIn={this.signIn} /> */}
+            {props.EtapaCriar == 1 ? (
+              <View style={styles.container}>
+                <Text style={styles.headerLabel} >~{"\n"} Informe a cidade de destino da viagem</Text>
+                <TextInput value={props.destino} onChangeText={(text) => props.onChangeTextDestino(text)} />
+                <Button
+                  onPress={() => props.onPressProximaEtapa(1)}
+                  title="Proxima etapa >"
+                  color="#841584"
+                  accessibilityLabel="Proxima Etapa"
+                />
+              </View>
+            ) : props.EtapaCriar == 2 ? (
+              <View style={styles.container}>
+                <Text style={styles.headerLabel} >~{"\n"} Convidar amigos</Text>
+                <Button
+                  onPress={() => props.onPressProximaEtapa(2)}
+                  title="Convidar Membros da viagem >"
+                  color="#841584"
+                  accessibilityLabel="Convidar Membros da viagem"
+                />
+              </View>
+            ) : (
+                  <View style={styles.container}>
+                    <Text style={styles.headerLabel} >~{"\n"} Informe a cidade de destino da viagem</Text>
+                    <TextInput value={props.destino} onChangeText={(text) => props.onChangeTextDestino(text)} />
+                    <Button
+                      onPress={() => props.onPressProximaEtapa(1)}
+                      title="Proxima etapa >"
+                      color="#841584"
+                      accessibilityLabel="Proxima Etapa"
+                    />
+                  </View>
+                )}
           </View>
         ) : props.tela == 'home' ?
             (
@@ -222,63 +260,6 @@ const LoggedInPage = props => {
     </View>
   )
 }
-
-// const GooglePlacesInput = () => {
-//   return (
-//     <GooglePlacesAutocomplete
-//       placeholder='Search'
-//       minLength={3} // minimum length of text to search
-//       autoFocus={false}
-//       returnKeyType={'search'} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
-//       listViewDisplayed='auto'    // true/false/undefined
-//       fetchDetails={true}
-//       renderDescription={row => row.description} // custom description render
-//       onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
-//         console.log(data, details);
-//       }}
-
-//       getDefaultValue={() => ''}
-
-//       query={{
-//         // available options: https://developers.google.com/places/web-service/autocomplete
-//         key: 'AIzaSyDKaWvJamhgtX7lJ11QwgOAV7RvOavTKj0',
-//         language: 'pt', // language of the results
-//         types: '(cities)' // default: 'geocode'
-//       }}
-
-//       styles={{
-//         textInputContainer: {
-//           width: '100%'
-//         },
-//         description: {
-//           fontWeight: 'bold'
-//         },
-//         predefinedPlacesDescription: {
-//           color: '#1faadb'
-//         }
-//       }}
-
-//       currentLocation={true} // Will add a 'Current location' button at the top of the predefined places list
-//       currentLocationLabel="Current location"
-//       nearbyPlacesAPI='GooglePlacesSearch' // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
-//       GoogleReverseGeocodingQuery={{
-//         // available options for GoogleReverseGeocoding API : https://developers.google.com/maps/documentation/geocoding/intro
-//       }}
-//       GooglePlacesSearchQuery={{
-//         // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
-//         rankby: 'distance',
-//         types: 'food'
-//       }}
-
-//       filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
-//       predefinedPlaces={[homePlace, workPlace]}
-
-//       debounce={200} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
-//       renderLeftButton={()  => <Image source={require('path/custom/left-icon')} />}
-//       renderRightButton={() => <Text>Custom text after the input</Text>}
-//     />
-//   );
-// }
 
 const styles = StyleSheet.create({
   container: {
