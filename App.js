@@ -31,7 +31,7 @@ export default class App extends React.Component {
     // this.handleClickFooter = this.handleClickFooter.bind(this,"");
     // this.teste = this.teste.bind(this);
   }
-  signIn = async () => {
+  signIn() {
     try {
       const result = await Expo.Google.logInAsync({
         androidClientId: androidClientId,
@@ -110,12 +110,17 @@ export default class App extends React.Component {
     try {
       if (param == 1) {
         this.setState({ EtapaCriar: 2 }, () => {
-          Alert.alert(' Grupo criado com sucesso!!!\n Codigo do Grupo : XXW3AP')
+          this.setState({
+            codigoGrupo: Math.random().toString(36).substring(5).toUpperCase()
+          }, () => {
+            Alert.alert('Codigo do Grupo : ' + this.state.codigoGrupo + '\nDestino a : ' + this.state.destino)
+          })
+
         })
       } else if (param == 2) {
         // this.setState({ EtapaCriar: 3 }, () => {
         // })
-        Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravellGroup. Codigo do Grupo : XXW3AP'.replace(/ /g, '%20'))
+        Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
       }
     } catch (e) {
       console.log("error", e)
