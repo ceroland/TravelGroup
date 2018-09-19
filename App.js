@@ -9,6 +9,7 @@ import { googleMapsApi } from "./superSecretKey"
 import Expo from "expo"
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geocoder from 'react-native-geocoding';
+import MapView, { Marker } from 'react-native-maps'
 // import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } } };
@@ -31,7 +32,7 @@ export default class App extends React.Component {
     // this.handleClickFooter = this.handleClickFooter.bind(this,"");
     // this.teste = this.teste.bind(this);
   }
-  signIn() {
+  signIn = async () => {
     try {
       const result = await Expo.Google.logInAsync({
         androidClientId: androidClientId,
@@ -118,9 +119,9 @@ export default class App extends React.Component {
 
         })
       } else if (param == 2) {
-        // this.setState({ EtapaCriar: 3 }, () => {
-        // })
-        Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
+        this.setState({ EtapaCriar: 3 }, () => {
+          Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
+        })
       }
     } catch (e) {
       console.log("error", e)
@@ -202,16 +203,17 @@ const LoggedInPage = props => {
                 />
               </View>
             ) : (
-                  <View style={styles.container}>
-                    <Text style={styles.headerLabel} >~{"\n"} Informe a cidade de destino da viagem</Text>
-                    <TextInput value={props.destino} onChangeText={(text) => props.onChangeTextDestino(text)} />
-                    <Button
-                      onPress={() => props.onPressProximaEtapa(1)}
-                      title="Proxima etapa >"
-                      color="#841584"
-                      accessibilityLabel="Proxima Etapa"
-                    />
-                  </View>
+                  <MapView
+                    style={styles.container}
+                    initialRegion={{
+                      latitude: 45.5209087,
+                      longitude: -122.6705107,
+                      latitudeDelta: 0.0922,
+                      longitudeDelta: 0.0421,
+                    }}
+                  >
+                  </MapView>
+
                 )}
           </View>
         ) : props.tela == 'home' ?
