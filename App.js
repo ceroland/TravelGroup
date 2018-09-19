@@ -206,12 +206,49 @@ const LoggedInPage = props => {
                   <MapView
                     style={styles.container}
                     initialRegion={{
-                      latitude: 45.5209087,
-                      longitude: -122.6705107,
+                      latitude: -20.697436,
+                      longitude: -47.399491,
                       latitudeDelta: 0.0922,
                       longitudeDelta: 0.0421,
                     }}
                   >
+                    <MapView.Marker
+                      image={require('./images/destino.png')}
+                      coordinate={{
+                        latitude: -20.537436,
+                        longitude: -47.399491
+                      }}
+                      title={"Destino"}
+                      description={"Destino da viagem"}
+                    />
+                    <MapView.Marker
+                      image={require('./images/carro_amigo.png')}
+                      coordinate={{
+                        latitude: -20.590102, 
+                        longitude: -47.384554
+                      }}
+                      title={"Fernando"}
+                      description={"Veiculo do Fernando"}
+                    />
+                    <MapView.Marker
+                      image={require('./images/carro_amigo.png')}
+                      coordinate={{
+                        latitude: -20.592634, 
+                        longitude: -47.386401
+                      }}
+                      title={"Fernando"}
+                      description={"Veiculo do Fernando"}
+                    />
+                    <MapView.Marker
+                      image={require('./images/carro.png')}
+                      coordinate={{
+                        latitude: -20.593819,
+                        longitude: -47.387291
+                      }}
+                      title={"Você"}
+                      description={"Seu veiculo"}
+                    />
+
                   </MapView>
 
                 )}
