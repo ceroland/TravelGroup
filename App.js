@@ -1,12 +1,19 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, Image, Button, Platform,
-  TouchableOpacity,
-  FlatList, Alert
+  StyleSheet, Text, View, Image, Button, Platform, TextInput,
+  TouchableOpacity, ImageBackground,
+  FlatList, Alert, Linking
 } from "react-native"
 import { androidClientId } from "./superSecretKey"
+import { googleMapsApi } from "./superSecretKey"
 import Expo from "expo"
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Geocoder from 'react-native-geocoding';
+import MapView, { Marker } from 'react-native-maps'
+// import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+
+const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } } };
+const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } } };
 
 export default class App extends React.Component {
   constructor(props) {
@@ -17,7 +24,10 @@ export default class App extends React.Component {
         name: "",
         photoUrl: ""
       },
-      tela: "home"
+      tela: "home",
+      habilitaCriarGrupo: false,
+      destino: "",
+      EtapaCriar: 1
     }
     // this.handleClickFooter = this.handleClickFooter.bind(this,"");
     // this.teste = this.teste.bind(this);
@@ -48,24 +58,96 @@ export default class App extends React.Component {
   handleClickFooter = async (param) => {
     try {
       this.setState({ tela: param }, () => {
-        Alert.alert(this.state.tela)
+        //Alert.alert(this.state.tela)
       })
     } catch (e) {
       console.log("error", e)
     }
   }
 
+  onPressCreateGrupo = async () => {
+    try {
+      this.setState({ habilitaCriarGrupo: true }, () => {
+        // Alert.alert(this.state.habilitaCriarGrupo)
+      })
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+
+  onPressBuscaLongetudeLatidePorNome = async () => {
+    try {
+      //Geocoder.init(googleMapsApi);
+      Geocoder.fallbackToGoogle(googleMapsApi);
+
+      // Geocoder.from(this.state.destino).then(
+      //   json => {
+      //     let location = json.results[0].geometry.location;
+      //     alert(location.lat + ", " + location.lng);
+      //   }, 
+      //   error => {
+      //     console.log("error", e)
+      //   }
+      // ); 
+      Geocoder.geocodeAddress('New York').then(res => {
+        alert(location.lat + ", " + location.lng);
+      })
+        .catch(err => console.log(err))
+
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+  onChangeTextDestino = async (param) => {
+    try {
+      this.setState({ destino: param }, () => {
+        //  Alert.alert(this.state.destino)
+      })
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+  onPressProximaEtapa = async (param) => {
+    try {
+      if (param == 1) {
+        this.setState({ EtapaCriar: 2 }, () => {
+          this.setState({
+            codigoGrupo: Math.random().toString(36).substring(5).toUpperCase()
+          }, () => {
+            Alert.alert('Codigo do Grupo : ' + this.state.codigoGrupo + '\nDestino a : ' + this.state.destino)
+          })
+
+        })
+      } else if (param == 2) {
+        this.setState({ EtapaCriar: 3 }, () => {
+          Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
+        })
+      }
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+
+
+
   render() {
     return (
       <View style={styles.container}>
         {this.state.login.signedIn ? (
 
-          <LoggedInPage name={this.state.login.name} photoUrl={this.state.login.photoUrl}  handleClickFooter={this.handleClickFooter} tela={this.state.tela}/>
-
+          <LoggedInPage name={this.state.login.name}
+            photoUrl={this.state.login.photoUrl}
+            handleClickFooter={this.handleClickFooter}
+            tela={this.state.tela}
+            onPressCreateGrupo={this.onPressCreateGrupo}
+            habilitaCriarGrupo={this.state.habilitaCriarGrupo}
+            destino={this.state.destino}
+            onChangeTextDestino={this.onChangeTextDestino}
+            onPressBuscaLongetudeLatidePorNome={this.onPressBuscaLongetudeLatidePorNome}
+            onPressProximaEtapa={this.onPressProximaEtapa}
+            EtapaCriar={this.state.EtapaCriar} />
         ) : (
-            <View style={styles.containerLogin}>
-              <LoginPage signIn={this.signIn} />
-            </View>
+            <LoginPage signIn={this.signIn} />
           )}
       </View>
     )
@@ -74,19 +156,16 @@ export default class App extends React.Component {
 
 const LoginPage = props => {
   return (
-    <View>
-      <Text style={styles.header}>Login</Text>
-      <Button title="Logar com o Google" onPress={() => props.signIn()} />
-    </View>
+    <ImageBackground source={require('./images/logo_tcc.jpg')} style={styles.container}>
+      <View style={styles.containerLogin}>
+        <Button title="Logar com o Google" onPress={() => props.signIn()} />
+      </View>
+    </ImageBackground>
   )
 }
 
 const LoggedInPage = props => {
   return (
-    // <View style={styles.container}>
-    //   <Text style={styles.header}>Bem vindo:{props.name}</Text>
-    //   <Image style={styles.image} source={{ uri: props.photoUrl }} />
-    // </View>
     <View style={styles.container}>
       <View style={styles.navBar}>
         {/* <Image source={require('./images/logo.png')} style={{ width: 98, height: 22 }} /> */}
@@ -100,22 +179,124 @@ const LoggedInPage = props => {
         </View>
       </View>
       <View style={styles.body}>
-        {props.tela == 'home' ?
-          (
-            <View style={styles.container}>
-              <Text style={styles.header}>Bem vindo:{props.name}</Text>
-              <Image style={styles.image} source={{ uri: props.photoUrl }} />
-            </View>)
-          : (
-            <Text style={styles.header}>teste:{props.name}</Text>)
-        }
-        {/* <FlatList
-          // data={data.items}
-          // renderItem={(video)=><VideoItem video={video.item} />}
-          keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => <View style={{ height: 0.5, backgroundColor: '#E5E5E5' }} />}
+        {props.habilitaCriarGrupo ? (
+          <View style={styles.container}>
+            {props.EtapaCriar == 1 ? (
+              <View style={styles.container}>
+                <Text style={styles.headerLabel} >~{"\n"} Informe a cidade de destino da viagem</Text>
+                <TextInput value={props.destino} onChangeText={(text) => props.onChangeTextDestino(text)} />
+                <Button
+                  onPress={() => props.onPressProximaEtapa(1)}
+                  title="Proxima etapa >"
+                  color="#841584"
+                  accessibilityLabel="Proxima Etapa"
+                />
+              </View>
+            ) : props.EtapaCriar == 2 ? (
+              <View style={styles.container}>
+                <Text style={styles.headerLabel} >~{"\n"} Convidar amigos</Text>
+                <Button
+                  onPress={() => props.onPressProximaEtapa(2)}
+                  title="Convidar Membros da viagem >"
+                  color="#841584"
+                  accessibilityLabel="Convidar Membros da viagem"
+                />
+              </View>
+            ) : (
+                  <MapView
+                    style={styles.container}
+                    initialRegion={{
+                      latitude: -20.593819,
+                      longitude: -47.399491,
+                      latitudeDelta: 0.0922,
+                      longitudeDelta: 0.0421,
+                    }}
+                  >
+                    {/* arrayMakers.map(mark => (
+                    <MapView.Marke
+                      image={require(mark.img)}
+                      coordinate={{
+                        latitude: mark.lat,
+                        longitude: mark.long
+                      }}
+                      title={mark.titulo}
+                      description={mark.descricao}
+                    />
+                    ) */}
+                    <MapView.Marker
+                      image={require('./images/destino.png')}
+                      coordinate={{
+                        latitude: -20.553008,
+                        longitude: -47.393225
+                      }}
+                      title={"Destino"}
+                      description={"Destino da viagem"}
+                    />
+                    <MapView.Marker
+                      image={require('./images/carro_amigo.png')}
+                      coordinate={{
+                        latitude: -20.590102,
+                        longitude: -47.384554
+                      }}
+                      title={"Thalyta"}
+                      description={"Veiculo da Thalyta"}
+                    />
+                    <MapView.Marker
+                      image={require('./images/carro_amigo.png')}
+                      coordinate={{
+                        latitude: -20.592634,
+                        longitude: -47.386401
+                      }}
+                      title={"Fernando"}
+                      description={"Veiculo do Fernando"}
+                    />
+                    <MapView.Marker
+                      image={require('./images/carro.png')}
+                      coordinate={{
+                        latitude: -20.593819,
+                        longitude: -47.387291
+                      }}
+                      title={"Você"}
+                      description={"Seu veiculo"}
+                    />
 
-        /> */}
+                  </MapView>
+
+                )}
+          </View>
+        ) : props.tela == 'home' ?
+            (
+              <View style={styles.container}>
+                <Text style={styles.header}>Bem vindo:{props.name}</Text>
+                <Image style={styles.image} source={{ uri: props.photoUrl }} />
+              </View>
+            )
+            : props.tela == 'viagem' ?
+              (
+                <View>
+                  <Text style={styles.headerTitle} >Ingressar ao Grupo</Text>
+                  <Text style={styles.headerLabel} >~{"\n"} Para pingressar ao grupo existente, use o codigo do grupo fornecido pelo criador do mesmo</Text>
+                  <TextInput id="IdGrupo" />
+                  <Button
+                    onPress={() => props.onPressCreateGrupo()}
+                    title="Criar grupo"
+                    color="#841584"
+                    accessibilityLabel="Entrar no grupo"
+                  />
+                </View>
+              )
+              : (
+                <View>
+                  <Text style={styles.headerTitle} >Criar Grupo</Text>
+                  <Button
+                    onPress={() => props.onPressCreateGrupo()}
+                    title="Criar grupo"
+                    color="#841584"
+                    accessibilityLabel="Precione para criar um novo grupo"
+                  />
+                </View>
+              )
+        }
       </View>
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('home')}  >
@@ -126,7 +307,7 @@ const LoggedInPage = props => {
           <Icon name="navigation" size={25} />
           <Text style={styles.tabTitle}>Viagem</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('viagem')}    >
+        <TouchableOpacity style={styles.tabItem} onPress={() => props.handleClickFooter('grupo')}    >
           <Icon name="group" size={25} />
           <Text style={styles.tabTitle}>Grupo</Text>
         </TouchableOpacity>
@@ -141,7 +322,6 @@ const styles = StyleSheet.create({
   },
   containerLogin: {
     flex: 1,
-    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center"
   },
@@ -182,6 +362,18 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 25
+  },
+  headerTitle: {
+    fontSize: 17
+  },
+  headerLabel: {
+    fontSize: 15
+  },
+  ImageBackground: {
+    flex: 1,
+    width: null,
+    height: null,
+    resizeMode: 'cover'
   },
   image: {
     marginTop: 15,
