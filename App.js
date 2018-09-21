@@ -206,17 +206,28 @@ const LoggedInPage = props => {
                   <MapView
                     style={styles.container}
                     initialRegion={{
-                      latitude: -20.697436,
+                      latitude: -20.593819,
                       longitude: -47.399491,
                       latitudeDelta: 0.0922,
                       longitudeDelta: 0.0421,
                     }}
                   >
+                    {/* arrayMakers.map(mark => (
+                    <MapView.Marke
+                      image={require(mark.img)}
+                      coordinate={{
+                        latitude: mark.lat,
+                        longitude: mark.long
+                      }}
+                      title={mark.titulo}
+                      description={mark.descricao}
+                    />
+                    ) */}
                     <MapView.Marker
                       image={require('./images/destino.png')}
                       coordinate={{
-                        latitude: -20.537436,
-                        longitude: -47.399491
+                        latitude: -20.553008,
+                        longitude: -47.393225
                       }}
                       title={"Destino"}
                       description={"Destino da viagem"}
@@ -224,16 +235,16 @@ const LoggedInPage = props => {
                     <MapView.Marker
                       image={require('./images/carro_amigo.png')}
                       coordinate={{
-                        latitude: -20.590102, 
+                        latitude: -20.590102,
                         longitude: -47.384554
                       }}
-                      title={"Fernando"}
-                      description={"Veiculo do Fernando"}
+                      title={"Thalyta"}
+                      description={"Veiculo da Thalyta"}
                     />
                     <MapView.Marker
                       image={require('./images/carro_amigo.png')}
                       coordinate={{
-                        latitude: -20.592634, 
+                        latitude: -20.592634,
                         longitude: -47.386401
                       }}
                       title={"Fernando"}
