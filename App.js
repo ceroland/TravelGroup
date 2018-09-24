@@ -147,24 +147,48 @@ export default class App extends React.Component {
             console.log(this.state.cordenadas)
             this.setState({ EtapaCriar: 3 }, () => {
               Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
+              
             })
+            
           })
         }, (error) => {
-          alert(JSON.stringify(error))
+          console.log(JSON.stringify(error))
         }, {
             enableHighAccuracy: true,
             timeout: 20000,
             maximumAge: 1000
           });
 
-
+          this.getPosicoes()   
       }
     } catch (e) {
       console.log("error", e)
     }
   }
 
+  getPosicoes = async () => {
+    try {
+        setInterval(function () {
+          var x = navigator.geolocation.getCurrentPosition((position) => {
+            console.log('--------------------------------------')
+            console.log(position)
+            console.log('--------------------------------------')
+            this.setState({ cordenadas: position })
+          }, (error) => {
+            console.log('------------------- error -------------------')
+            console.log(JSON.stringify(error))
+            console.log('--------------------------------------')
+          }, {
+              enableHighAccuracy: true,
+              timeout: 20000,
+              maximumAge: 1000
+            });
+        }, 15000); //15 segundos
 
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
 
   render() {
     return (
@@ -264,8 +288,8 @@ const LoggedInPage = props => {
                     initialRegion={{
                       latitude: props.cordenadas.coords.latitude,
                       longitude: props.cordenadas.coords.longitude,
-                      latitudeDelta: 0.0922,
-                      longitudeDelta: 0.0421,
+                      latitudeDelta: 0.0923,
+                      longitudeDelta: 0.0422,
                     }}
                   >
                     <MapView.Marker

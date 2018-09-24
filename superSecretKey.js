@@ -1,5 +1,5 @@
 export const androidClientId =
-  "318709695883-sqif8hqdcqrhh0gdcrbo46uqm6tiepjt.apps.googleusercontent.com"
+  "77197964446-f9npa36q67iihqu43l6e4poffgsv80f0.apps.googleusercontent.com"
 
 export const googleMapsApi =
   "AIzaSyDKaWvJamhgtX7lJ11QwgOAV7RvOavTKj0"
