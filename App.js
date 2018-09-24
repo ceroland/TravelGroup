@@ -27,10 +27,19 @@ export default class App extends React.Component {
       tela: "home",
       habilitaCriarGrupo: false,
       destino: "",
-      EtapaCriar: 1
+      EtapaCriar: 1,
+      arrayMakers: [
+        { img: './images/carro_amigo.png', lat: -20.592634, long: -47.386401, titulo: "Thalyta", descricao: "Veiculo da Thalyta" },
+        { img: './images/carro_amigo.png', lat: -20.590102, long: -47.384554, titulo: "Fernando", descricao: "Veiculo do Fernando" }
+      ],
+      cordenadas:
+        {
+          coords: {
+            latitude: -20.593819,
+            longitude: -47.399491
+          }
+        }
     }
-    // this.handleClickFooter = this.handleClickFooter.bind(this,"");
-    // this.teste = this.teste.bind(this);
   }
   signIn = async () => {
     try {
@@ -77,22 +86,18 @@ export default class App extends React.Component {
 
   onPressBuscaLongetudeLatidePorNome = async () => {
     try {
-      //Geocoder.init(googleMapsApi);
-      Geocoder.fallbackToGoogle(googleMapsApi);
+      Geocoder.init(googleMapsApi);
+      // Geocoder.language = 'portuguese'
 
-      // Geocoder.from(this.state.destino).then(
-      //   json => {
-      //     let location = json.results[0].geometry.location;
-      //     alert(location.lat + ", " + location.lng);
-      //   }, 
-      //   error => {
-      //     console.log("error", e)
-      //   }
-      // ); 
-      Geocoder.geocodeAddress('New York').then(res => {
-        alert(location.lat + ", " + location.lng);
-      })
-        .catch(err => console.log(err))
+      Geocoder.from("Colosseum").then(
+        json => {
+          let location = json.results[0].geometry.location;
+          alert(location.lat + ", " + location.lng);
+        },
+        error => {
+          console.log("error", e)
+        }
+      );
 
     } catch (e) {
       console.log("error", e)
@@ -110,6 +115,22 @@ export default class App extends React.Component {
   onPressProximaEtapa = async (param) => {
     try {
       if (param == 1) {
+        // var options = {
+        //   language : 'ENGLISH' 
+        // }
+        // Geocoder.init(googleMapsApi, options);
+
+        // Geocoder.from("Coliseu").then(
+        //   json => {
+        //     let location = json.results[0].geometry.location;
+        //     alert(location.lat + ", " + location.lng);
+        //   }, 
+        //   error => {
+        //     console.log("error", e)
+        //   }
+        // );
+
+
         this.setState({ EtapaCriar: 2 }, () => {
           this.setState({
             codigoGrupo: Math.random().toString(36).substring(5).toUpperCase()
@@ -119,9 +140,24 @@ export default class App extends React.Component {
 
         })
       } else if (param == 2) {
-        this.setState({ EtapaCriar: 3 }, () => {
-          Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
-        })
+        var x = navigator.geolocation.getCurrentPosition((position) => {
+          this.setState({
+            cordenadas: position
+          }, () => {
+            console.log(this.state.cordenadas)
+            this.setState({ EtapaCriar: 3 }, () => {
+              Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
+            })
+          })
+        }, (error) => {
+          alert(JSON.stringify(error))
+        }, {
+            enableHighAccuracy: true,
+            timeout: 20000,
+            maximumAge: 1000
+          });
+
+
       }
     } catch (e) {
       console.log("error", e)
@@ -145,7 +181,9 @@ export default class App extends React.Component {
             onChangeTextDestino={this.onChangeTextDestino}
             onPressBuscaLongetudeLatidePorNome={this.onPressBuscaLongetudeLatidePorNome}
             onPressProximaEtapa={this.onPressProximaEtapa}
-            EtapaCriar={this.state.EtapaCriar} />
+            EtapaCriar={this.state.EtapaCriar}
+            arrayMakers={this.state.arrayMakers}
+            cordenadas={this.state.cordenadas} />
         ) : (
             <LoginPage signIn={this.signIn} />
           )}
@@ -162,6 +200,24 @@ const LoginPage = props => {
       </View>
     </ImageBackground>
   )
+}
+
+const Marcadores = properts => {
+  return properts.arrayMaker.map((data) => {
+    return (
+      <View key={data.lat + data.long}>
+        <MapView.Marker
+          image={require('./images/carro_amigo.png')}
+          coordinate={{
+            latitude: data.lat,
+            longitude: data.long
+          }}
+          title={data.titulo}
+          description={data.descricao}
+        />
+      </View>
+    )
+  })
 }
 
 const LoggedInPage = props => {
@@ -206,23 +262,12 @@ const LoggedInPage = props => {
                   <MapView
                     style={styles.container}
                     initialRegion={{
-                      latitude: -20.593819,
-                      longitude: -47.399491,
+                      latitude: props.cordenadas.coords.latitude,
+                      longitude: props.cordenadas.coords.longitude,
                       latitudeDelta: 0.0922,
                       longitudeDelta: 0.0421,
                     }}
                   >
-                    {/* arrayMakers.map(mark => (
-                    <MapView.Marke
-                      image={require(mark.img)}
-                      coordinate={{
-                        latitude: mark.lat,
-                        longitude: mark.long
-                      }}
-                      title={mark.titulo}
-                      description={mark.descricao}
-                    />
-                    ) */}
                     <MapView.Marker
                       image={require('./images/destino.png')}
                       coordinate={{
@@ -233,35 +278,18 @@ const LoggedInPage = props => {
                       description={"Destino da viagem"}
                     />
                     <MapView.Marker
-                      image={require('./images/carro_amigo.png')}
-                      coordinate={{
-                        latitude: -20.590102,
-                        longitude: -47.384554
-                      }}
-                      title={"Thalyta"}
-                      description={"Veiculo da Thalyta"}
-                    />
-                    <MapView.Marker
-                      image={require('./images/carro_amigo.png')}
-                      coordinate={{
-                        latitude: -20.592634,
-                        longitude: -47.386401
-                      }}
-                      title={"Fernando"}
-                      description={"Veiculo do Fernando"}
-                    />
-                    <MapView.Marker
+                      key={-47.387291 + -20.593819 - 10}
                       image={require('./images/carro.png')}
                       coordinate={{
-                        latitude: -20.593819,
-                        longitude: -47.387291
+                        latitude: props.cordenadas.coords.latitude,
+                        longitude: props.cordenadas.coords.longitude
                       }}
-                      title={"Você"}
-                      description={"Seu veiculo"}
+
+                      title='Você'
+                      description='Seu veiculo'
                     />
-
+                    <Marcadores arrayMaker={props.arrayMakers} />
                   </MapView>
-
                 )}
           </View>
         ) : props.tela == 'home' ?
