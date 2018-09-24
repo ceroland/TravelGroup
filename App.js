@@ -10,6 +10,7 @@ import Expo from "expo"
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geocoder from 'react-native-geocoding';
 import MapView, { Marker } from 'react-native-maps'
+import firebase from 'firebase';
 // import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } } };
@@ -41,6 +42,25 @@ export default class App extends React.Component {
         }
     }
   }
+
+  componentWillMount() {
+
+    // To Configure react native app with cloud of Google Firebase database !
+    var config = {
+      apiKey: googleMapsApi,
+      authDomain: "travelgroup-203319.firebaseapp.com",
+      databaseURL: "https://travelgroup-203319.firebaseio.com",
+      projectId: "travelgroup-203319",
+      storageBucket: "travelgroup-203319.appspot.com",
+      messagingSenderId: "77197964446"
+    };
+    firebase.initializeApp(config);
+    // // To select data from firebase every time data has changed !
+    // firebase.database().ref('users').on('value', (data) => {
+    //     console.log(data.toJSON());
+    // })
+  }
+
   signIn = async () => {
     try {
       const result = await Expo.Google.logInAsync({
@@ -144,12 +164,27 @@ export default class App extends React.Component {
           this.setState({
             cordenadas: position
           }, () => {
-            console.log(this.state.cordenadas)
+            console.log()
             this.setState({ EtapaCriar: 3 }, () => {
               Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
-              
+              firebase.database().ref('Coordenadas/' + this.state.codigoGrupo + '/' + this.state.login.name).set(
+                {
+                  name: this.state.login.name,
+                  longetude: this.state.cordenadas.coords.longitude,
+                  latitude: this.state.cordenadas.coords.latitude
+                }
+              ).then(() => {
+                firebase.database().ref('Coordenadas/' + this.state.codigoGrupo).on('value', (data) => {
+                  var obj = data.toJSON()
+                  Object.keys(obj).forEach(function (entry) {
+                    console.log(obj);
+                  });
+                })
+              }).catch((error) => {
+                console.log(error);
+              });
             })
-            
+
           })
         }, (error) => {
           console.log(JSON.stringify(error))
@@ -159,7 +194,7 @@ export default class App extends React.Component {
             maximumAge: 1000
           });
 
-          this.getPosicoes()   
+        this.getPosicoes()
       }
     } catch (e) {
       console.log("error", e)
@@ -168,22 +203,33 @@ export default class App extends React.Component {
 
   getPosicoes = async () => {
     try {
-        setInterval(function () {
-          var x = navigator.geolocation.getCurrentPosition((position) => {
-            console.log('--------------------------------------')
-            console.log(position)
-            console.log('--------------------------------------')
-            this.setState({ cordenadas: position })
-          }, (error) => {
-            console.log('------------------- error -------------------')
-            console.log(JSON.stringify(error))
-            console.log('--------------------------------------')
-          }, {
-              enableHighAccuracy: true,
-              timeout: 20000,
-              maximumAge: 1000
+      setInterval(function () {
+        var x = navigator.geolocation.getCurrentPosition((position) => {
+          console.log('--------------------------------------')
+          console.log(position)
+          console.log('--------------------------------------')
+          this.setState({ cordenadas: position }, () => {
+
+            // To Update a user
+            firebase.database().ref('Coordenadas/' + this.state.codigoGrupo + '/' + this.state.login.name).update({
+              longetude: this.state.cordenadas.coords.longitude,
+              latitude: this.state.cordenadas.coords.latitude
             });
-        }, 15000); //15 segundos
+            // firebase.database().ref('Coordenadas/' + this.state.codigoGrupo).on('value', (data) => {
+            //   console.log(data.toJSON());
+            // })
+
+          })
+        }, (error) => {
+          console.log('------------------- error -------------------')
+          console.log(JSON.stringify(error))
+          console.log('---------------------------------------------')
+        }, {
+            enableHighAccuracy: true,
+            timeout: 30000,
+            maximumAge: 1000
+          });
+      }, 15000); //15 segundos aproximado
 
     } catch (e) {
       console.log("error", e)

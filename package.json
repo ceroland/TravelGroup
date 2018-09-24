@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "expo": "^25.0.0",
+    "firebase": "^5.5.1",
     "react": "16.2.0",
     "react-native": "0.52.0",
     "react-native-geocoding": "^0.3.0",
