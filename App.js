@@ -164,7 +164,6 @@ export default class App extends React.Component {
           this.setState({
             cordenadas: position
           }, () => {
-            console.log()
             this.setState({ EtapaCriar: 3 }, () => {
               Linking.openURL('https://api.whatsapp.com/send?text=' + 'Este é um convite para viajar comigo no aplicativo TravelGroup. Codigo do Grupo : '.replace(/ /g, '%20') + this.state.codigoGrupo)
               firebase.database().ref('Coordenadas/' + this.state.codigoGrupo + '/' + this.state.login.name).set(
@@ -174,12 +173,25 @@ export default class App extends React.Component {
                   latitude: this.state.cordenadas.coords.latitude
                 }
               ).then(() => {
-                firebase.database().ref('Coordenadas/' + this.state.codigoGrupo).on('value', (data) => {
+                var x = [];
+                var nome = this.state.login.name;
+                var GetCoordenadas = firebase.database().ref('Coordenadas/' + this.state.codigoGrupo).on('value', (data) => {
                   var obj = data.toJSON()
                   Object.keys(obj).forEach(function (entry) {
-                    console.log(obj);
+                    let y = {};
+                    if (obj[entry].name != nome) {
+                      y = obj[entry];
+                      y.img = './images/carro_amigo.png';
+                      y.lat = obj[entry].latitude;
+                      y.long = obj[entry].longetude;
+                      y.titulo = obj[entry].name;
+                      y.descricao = "Veiculo do(a) " + obj[entry].name;
+                      x.push(y)
+                    }
                   });
+                  this.setState({ arrayMakers: x }, () => { });
                 })
+
               }).catch((error) => {
                 console.log(error);
               });
@@ -210,14 +222,7 @@ export default class App extends React.Component {
           console.log('--------------------------------------')
           this.setState({ cordenadas: position }, () => {
 
-            // To Update a user
-            firebase.database().ref('Coordenadas/' + this.state.codigoGrupo + '/' + this.state.login.name).update({
-              longetude: this.state.cordenadas.coords.longitude,
-              latitude: this.state.cordenadas.coords.latitude
-            });
-            // firebase.database().ref('Coordenadas/' + this.state.codigoGrupo).on('value', (data) => {
-            //   console.log(data.toJSON());
-            // })
+
 
           })
         }, (error) => {
