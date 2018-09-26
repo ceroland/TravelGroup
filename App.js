@@ -40,8 +40,21 @@ export default class App extends React.Component {
             longitude: -47.399491
           }
         }
-    }
+    },
+      console.disableYellowBox = true
   }
+
+  componentDidMount() {
+    this.timerID = setInterval(
+      () => this.getPosicoes(),
+      2500
+    );
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+
 
   componentWillMount() {
 
@@ -189,7 +202,9 @@ export default class App extends React.Component {
                       x.push(y)
                     }
                   });
-                  this.setState({ arrayMakers: x }, () => { });
+                  this.setState({ arrayMakers: x }, () => {
+                    this.getPosicoes();
+                  });
                 })
 
               }).catch((error) => {
@@ -206,7 +221,6 @@ export default class App extends React.Component {
             maximumAge: 1000
           });
 
-        this.getPosicoes()
       }
     } catch (e) {
       console.log("error", e)
@@ -215,27 +229,43 @@ export default class App extends React.Component {
 
   getPosicoes = async () => {
     try {
-      setInterval(function () {
-        var x = navigator.geolocation.getCurrentPosition((position) => {
-          console.log('--------------------------------------')
-          console.log(position)
-          console.log('--------------------------------------')
-          this.setState({ cordenadas: position }, () => {
-
-
-
+      if (this.state.EtapaCriar == 3) {
+        console.disableYellowBox = true
+        var zz = navigator.geolocation.getCurrentPosition((position) => {
+          this.setState({
+            cordenadas: position
+          }, () => {
+            firebase.database().ref('Coordenadas/' + this.state.codigoGrupo + '/' + this.state.login.name).set(
+              {
+                name: this.state.login.name,
+                longetude: this.state.cordenadas.coords.longitude,
+                latitude: this.state.cordenadas.coords.latitude
+              }
+            ).then(() => {
+              var p = [];
+              var nome = this.state.login.name;
+              var GetCoordenadas = firebase.database().ref('Coordenadas/' + this.state.codigoGrupo).on('value', (data) => {
+                var obj = data.toJSON()
+                Object.keys(obj).forEach(function (entry) {
+                  let y = {};
+                  if (obj[entry].name != nome) {
+                    y = obj[entry];
+                    y.img = './images/carro_amigo.png';
+                    y.lat = obj[entry].latitude;
+                    y.long = obj[entry].longetude;
+                    y.titulo = obj[entry].name;
+                    y.descricao = "Veiculo do(a) " + obj[entry].name;
+                    p.push(y)
+                  }
+                });
+                this.setState({ arrayMakers: p }, () => { console.log('ok'); });
+              })
+            }).catch((error) => {
+              console.log(error);
+            });
           })
-        }, (error) => {
-          console.log('------------------- error -------------------')
-          console.log(JSON.stringify(error))
-          console.log('---------------------------------------------')
-        }, {
-            enableHighAccuracy: true,
-            timeout: 30000,
-            maximumAge: 1000
-          });
-      }, 15000); //15 segundos aproximado
-
+        })
+      }
     } catch (e) {
       console.log("error", e)
     }
