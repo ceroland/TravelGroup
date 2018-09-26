@@ -107,10 +107,43 @@ export default class App extends React.Component {
     }
   }
 
-  onPressCreateGrupo = async () => {
+  onPressCreateGrupo = async (entrar) => {
     try {
       this.setState({ habilitaCriarGrupo: true }, () => {
-        // Alert.alert(this.state.habilitaCriarGrupo)
+        if (entrar == true) {
+          this.setState({ EtapaCriar: 3 }, () => {
+            firebase.database().ref('Coordenadas/' + this.state.codigoGrupo + '/' + this.state.login.name).set(
+              {
+                name: this.state.login.name,
+                longetude: this.state.cordenadas.coords.longitude,
+                latitude: this.state.cordenadas.coords.latitude
+              }
+            ).then(() => {
+              var x = [];
+              var nome = this.state.login.name;
+              var GetCoordenadas = firebase.database().ref('Coordenadas/' + this.state.codigoGrupo).on('value', (data) => {
+                var obj = data.toJSON()
+                Object.keys(obj).forEach(function (entry) {
+                  let y = {};
+                  if (obj[entry].name != nome) {
+                    y = obj[entry];
+                    y.img = './images/carro_amigo.png';
+                    y.lat = obj[entry].latitude;
+                    y.long = obj[entry].longetude;
+                    y.titulo = obj[entry].name;
+                    y.descricao = "Veiculo do(a) " + obj[entry].name;
+                    x.push(y)
+                  }
+                });
+                this.setState({ arrayMakers: x }, () => {
+                  this.getPosicoes();
+                });
+              })
+            }).catch((error) => {
+              console.log(error);
+            });
+          })
+        }
       })
     } catch (e) {
       console.log("error", e)
@@ -145,6 +178,16 @@ export default class App extends React.Component {
       console.log("error", e)
     }
   }
+
+  onChangeTextGrupo = async (param) => {
+    try {
+      this.setState({ codigoGrupo: param }, () => {
+      })
+    } catch (e) {
+      console.log("error", e)
+    }
+  }
+
   onPressProximaEtapa = async (param) => {
     try {
       if (param == 1) {
@@ -288,7 +331,9 @@ export default class App extends React.Component {
             onPressProximaEtapa={this.onPressProximaEtapa}
             EtapaCriar={this.state.EtapaCriar}
             arrayMakers={this.state.arrayMakers}
-            cordenadas={this.state.cordenadas} />
+            cordenadas={this.state.cordenadas}
+            onChangeTextGrupo={this.onChangeTextGrupo}
+            codigoGrupo={this.state.codigoGrupo} />
         ) : (
             <LoginPage signIn={this.signIn} />
           )}
@@ -408,11 +453,11 @@ const LoggedInPage = props => {
               (
                 <View>
                   <Text style={styles.headerTitle} >Ingressar ao Grupo</Text>
-                  <Text style={styles.headerLabel} >~{"\n"} Para pingressar ao grupo existente, use o codigo do grupo fornecido pelo criador do mesmo</Text>
-                  <TextInput id="IdGrupo" />
+                  <Text style={styles.headerLabel} >~{"\n"} Para ingressar ao grupo existente, use o codigo do grupo fornecido pelo criador do mesmo</Text>
+                  <TextInput value={props.codigoGrupo} onChangeText={(text) => props.onChangeTextGrupo(text)} />
                   <Button
-                    onPress={() => props.onPressCreateGrupo()}
-                    title="Criar grupo"
+                    onPress={() => props.onPressCreateGrupo(true)}
+                    title="Entrar em um Grupo"
                     color="#841584"
                     accessibilityLabel="Entrar no grupo"
                   />
@@ -422,7 +467,7 @@ const LoggedInPage = props => {
                 <View>
                   <Text style={styles.headerTitle} >Criar Grupo</Text>
                   <Button
-                    onPress={() => props.onPressCreateGrupo()}
+                    onPress={() => props.onPressCreateGrupo(false)}
                     title="Criar grupo"
                     color="#841584"
                     accessibilityLabel="Precione para criar um novo grupo"
