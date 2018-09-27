@@ -470,7 +470,7 @@ const LoggedInPage = props => {
                     onPress={() => props.onPressCreateGrupo(false)}
                     title="Criar grupo"
                     color="#841584"
-                    accessibilityLabel="Precione para criar um novo grupo"
+                    accessibilityLabel="Pressione para criar um novo grupo"
                   />
                 </View>
               )
