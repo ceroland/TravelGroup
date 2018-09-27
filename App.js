@@ -389,7 +389,7 @@ const LoggedInPage = props => {
           <View style={styles.container}>
             {props.EtapaCriar == 1 ? (
               <View style={styles.container}>
-                <Text style={styles.headerLabel} >~{"\n"} Informe a cidade de destino da viagem</Text>
+                <Text style={styles.headerLabel} >{"\n"} Informe a cidade de destino da viagem</Text>
                 <TextInput value={props.destino} onChangeText={(text) => props.onChangeTextDestino(text)} />
                 <Button
                   onPress={() => props.onPressProximaEtapa(1)}
@@ -400,7 +400,7 @@ const LoggedInPage = props => {
               </View>
             ) : props.EtapaCriar == 2 ? (
               <View style={styles.container}>
-                <Text style={styles.headerLabel} >~{"\n"} Convidar amigos</Text>
+                <Text style={styles.headerLabel} >{"\n"} Convidar amigos</Text>
                 <Button
                   onPress={() => props.onPressProximaEtapa(2)}
                   title="Convidar Membros da viagem >"
@@ -452,12 +452,12 @@ const LoggedInPage = props => {
             : props.tela == 'viagem' ?
               (
                 <View>
-                  <Text style={styles.headerTitle} >Ingressar ao Grupo</Text>
-                  <Text style={styles.headerLabel} >~{"\n"} Para ingressar ao grupo existente, use o codigo do grupo fornecido pelo criador do mesmo</Text>
+                  {/* <Text style={styles.headerTitle} >Ingressar ao Grupo</Text> */}
+                  <Text style={styles.headerLabel} >{"\n"} Para ingressar ao grupo existente, use o codigo do grupo fornecido pelo criador do mesmo</Text>
                   <TextInput value={props.codigoGrupo} onChangeText={(text) => props.onChangeTextGrupo(text)} />
                   <Button
                     onPress={() => props.onPressCreateGrupo(true)}
-                    title="Entrar em um Grupo"
+                    title="Entrar no Grupo"
                     color="#841584"
                     accessibilityLabel="Entrar no grupo"
                   />
@@ -465,7 +465,7 @@ const LoggedInPage = props => {
               )
               : (
                 <View>
-                  <Text style={styles.headerTitle} >Criar Grupo</Text>
+                  {/* <Text style={styles.headerTitle} >Criar Grupo</Text> */}
                   <Button
                     onPress={() => props.onPressCreateGrupo(false)}
                     title="Criar grupo"
